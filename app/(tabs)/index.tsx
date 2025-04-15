@@ -26,6 +26,7 @@ const ble_devices: Array<any> = [];
 
 
 export var signal_log: number[] = [];
+export var ble_lastUpdateTime: number = 0;
 
 
 
@@ -200,6 +201,8 @@ useEffect(() => {
                     console.log( "In: ", device.id, d.rssi, device.rssi, "Timestamp: ", new Date().toISOString());
                   if (device.rssi !== null) {
                     signal_log.push(device.rssi);
+
+                    ble_lastUpdateTime = Date.now();
 
                     if (signal_log.length > 50) {
                       signal_log.shift(); // Remove the oldest item to maintain the limit

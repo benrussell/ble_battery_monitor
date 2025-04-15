@@ -19,7 +19,7 @@ import { LineChart } from 'react-native-chart-kit';
 import Svg, { Circle, Rect } from 'react-native-svg';
 
 
-import { signal_log } from './index';
+import { signal_log, ble_lastUpdateTime } from './index';
 
 
 // const data = [40, 50, 80, 120, 240, 480, 140, 110];
@@ -27,6 +27,28 @@ const data = signal_log;
 
 
 const screenWidth = Dimensions.get('window').width;
+
+
+
+function LastUpdateLabel() {
+	const [lastUpdate, setLastUpdate] = useState(ble_lastUpdateTime);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setLastUpdate(ble_lastUpdateTime); // Update with the latest value
+		}, 1000); // Adjust the interval as needed
+
+		return () => clearInterval(interval); // Cleanup on unmount
+	}, []);
+
+	return (
+		<ThemedText style={{ marginVertical: 8 }}>
+			Last Update: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : 'N/A'}
+			{' '}
+			(Delta Time: {lastUpdate ? `${Math.floor((Date.now() - lastUpdate) / 1000)}s` : 'N/A'})
+		</ThemedText>
+	);
+}
 
 
 
@@ -45,20 +67,21 @@ export default function TabTwoScreen() {
 
   return (
 	<ParallaxScrollView
-	  headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-	  headerImage={
-		<IconSymbol
-		  size={310}
-		  color="#808080"
-		  name="chevron.left.forwardslash.chevron.right"
-		  style={styles.headerImage}
-		/>
-	  }>
-	  <ThemedView style={styles.titleContainer}>
-		<ThemedText type="title">Details Page</ThemedText>
-	  </ThemedView>
-	  <ThemedText>HRM Graph</ThemedText>
-
+		  headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+		  headerImage={
+			<IconSymbol
+			  size={310}
+			  color="#808080"
+			  name="chevron.left.forwardslash.chevron.right"
+			  style={styles.headerImage}
+			/>
+		  }>
+		  <ThemedView style={styles.titleContainer}>
+			<ThemedText type="title">Details Page</ThemedText>
+		  </ThemedView>
+		  <ThemedText>HRM Graph</ThemedText>
+		  <LastUpdateLabel />
+	  
 	<View>
 			<LineChart				
 				data={{
