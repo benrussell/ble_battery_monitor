@@ -8,8 +8,13 @@ import { ThemedView } from '@/components/ThemedView';
 import { BleManager } from 'react-native-ble-plx';
 import { useEffect, useState } from 'react';
 
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
-
+// Define the type for your navigation routes
+type RootStackParamList = {
+  Home: undefined;
+  Details: { device: { id: string; name: string } };
+};
 
 
 const ble_mgr = new BleManager();
@@ -62,6 +67,7 @@ async function checkBlePermissions() {
 
 
 function btDeviceSelected(device: any): void {
+
   console.log(`Selected device: ${device.name} (${device.id})`);
   // You can add additional logic here, such as connecting to the device
   ble_mgr.connectToDevice(device.id)
@@ -110,28 +116,32 @@ const SelectableDevice = ({
 	device,
 	onSelect,
 }: {
-	device: { id: string; name: string };
+	device: { id: string; name: string, rssi: number };
 	onSelect: (device: { id: string; name: string }) => void;
 }) => {
-	const [pressed, setPressed] = useState(false);
-
+  const [pressed, setPressed] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  
 	return (
-		<Pressable
-			onPress={() => onSelect(device)}
-			onPressIn={() => setPressed(true)}
-			onPressOut={() => setPressed(false)}
-		>
-			<Text
-				style={{
-					backgroundColor: pressed ? 'red' : '#f0f0f0',
-					padding: 10,
-					borderRadius: 5,
-					marginVertical: 8,
-				}}
-			>
-				{device.name} ({device.id})
-			</Text>
-		</Pressable>
+    <Pressable
+      onPress={() => {
+        //onSelect(device);
+        navigation.navigate('Details', { device })
+      }}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+    >
+      <Text
+        style={{
+          backgroundColor: pressed ? 'red' : '#f0f0f0',
+          padding: 10,
+          borderRadius: 5,
+          marginVertical: 8,
+        }}
+      >
+        {device.name} ({device.id} {device.rssi})
+      </Text>
+    </Pressable>
 	);
 };
 
@@ -146,6 +156,8 @@ export default function HomeScreen() {
 const [ble_devices, setDevices] = useState<Array<any>>([]);
 
 useEffect(() => {
+
+
   const startBleScan = async () => {
     const hasPermissions = await checkBlePermissions();
     if (hasPermissions) {
@@ -158,13 +170,23 @@ useEffect(() => {
         }
 
         if (device) {
+          // console.log(device);
           // Avoid duplicates by checking if the device is already in the array
           setDevices((prevDevices) => {
             const exists = prevDevices.some((d) => d.id === device.id);
             if (!exists) {
               return [...prevDevices, device];
             }
-            return prevDevices;
+            console.log("Device already exists in the list:", device.id);
+            // Optionally, you can update the RSSI value if needed
+            const updatedDevices = prevDevices.map((d) => {
+              if (d.id === device.id) {
+                return { ...d, rssi: device.rssi };
+              }
+              return d;
+            });
+            return updatedDevices;
+            //return prevDevices;
           });
         }
       });
@@ -184,13 +206,6 @@ useEffect(() => {
     console.log('Stopped BLE device scan.');
   };
 }, []);
-
-
-
-
-
-
-
 
   return (
     <ParallaxScrollView
