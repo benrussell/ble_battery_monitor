@@ -25,7 +25,7 @@ export const ble_mgr = new BleManager();
 const ble_devices: Array<any> = [];
 
 
-export var signal_log: number[] = [];
+export var signal_log: number[] = [-45];
 export var ble_lastUpdateTime: number = 0;
 
 

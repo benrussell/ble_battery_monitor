@@ -88,7 +88,7 @@ export default function TabTwoScreen() {
 					labels: [], //data.map((_, index) => `Point ${index + 1}`),
 					datasets: [
 						{
-							data: [-30, ...data, -95]
+							data: data
 						},
 					],
 				}}
