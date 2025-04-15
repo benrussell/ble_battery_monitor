@@ -13,14 +13,19 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 // Define the type for your navigation routes
 type RootStackParamList = {
   Home: undefined;
-  Details: { device: { id: string; name: string } };
+  details: { device: { id: string; name: string } };
 };
 
 
-const ble_mgr = new BleManager();
+
+import { ScanMode } from 'react-native-ble-plx';
+
+export const ble_mgr = new BleManager();
 
 const ble_devices: Array<any> = [];
 
+
+export var signal_log: number[] = [];
 
 
 
@@ -126,7 +131,7 @@ const SelectableDevice = ({
     <Pressable
       onPress={() => {
         //onSelect(device);
-        navigation.navigate('Details', { device })
+        navigation.navigate('details', { device })
       }}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
@@ -155,15 +160,22 @@ export default function HomeScreen() {
 // Inside the HomeScreen component
 const [ble_devices, setDevices] = useState<Array<any>>([]);
 
-useEffect(() => {
 
+
+
+
+
+
+
+
+useEffect(() => {
 
   const startBleScan = async () => {
     const hasPermissions = await checkBlePermissions();
     if (hasPermissions) {
       console.log('BLE permissions are granted. Starting device scan...');
 
-      ble_mgr.startDeviceScan(null, null, (error, device) => {
+      ble_mgr.startDeviceScan(null, { scanMode: ScanMode.LowLatency }, (error, device) => {
         if (error) {
           console.error('Device scan error:', error);
           return;
@@ -177,10 +189,28 @@ useEffect(() => {
             if (!exists) {
               return [...prevDevices, device];
             }
-            console.log("Device already exists in the list:", device.id);
+            //console.log("Device already exists in the list:", device.id, device.rssi);
             // Optionally, you can update the RSSI value if needed
             const updatedDevices = prevDevices.map((d) => {
               if (d.id === device.id) {
+                if( device.id == "CC:AC:0C:1B:E0:8F" ){
+                  console.log( "P3: ", device.id, d.rssi, device.rssi);
+                }
+                if( device.id == "C9:2F:AC:B3:7D:68" ){
+                    console.log( "In: ", device.id, d.rssi, device.rssi, "Timestamp: ", new Date().toISOString());
+                  if (device.rssi !== null) {
+                    signal_log.push(device.rssi);
+
+                    if (signal_log.length > 50) {
+                      signal_log.shift(); // Remove the oldest item to maintain the limit
+                    }
+                  }
+                    // console.log(device)
+
+
+                }
+
+                //console.log( "update: ", device.id, d.rssi, device.rssi);
                 return { ...d, rssi: device.rssi };
               }
               return d;
@@ -222,16 +252,68 @@ useEffect(() => {
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Device List</ThemedText>
+
+
+        <Pressable
+      onPress={() => {
+        ble_mgr.stopDeviceScan();
+        //onSelect(device);
+        // navigation.navigate('Details', { device })
+      }}
+      // onPressIn={() => setPressed(true)}
+      // onPressOut={() => setPressed(false)}
+    >
+      <Text
+        style={{
+          // backgroundColor: pressed ? 'red' : '#f0f0f0',
+          padding: 10,
+          borderRadius: 5,
+          marginVertical: 8,
+        }}
+      >
+        {/* {device.name} ({device.id} {device.rssi}) */}
+        Stop Scan
+      </Text>
+    </Pressable>
+
+
+
+    <Pressable
+      onPress={() => {
+        //startBleScan();
+        //onSelect(device);
+        // navigation.navigate('Details', { device })
+      }}
+      // onPressIn={() => setPressed(true)}
+      // onPressOut={() => setPressed(false)}
+    >
+      <Text
+        style={{
+          // backgroundColor: pressed ? 'red' : '#f0f0f0',
+          padding: 10,
+          borderRadius: 5,
+          marginVertical: 8,
+        }}
+      >
+        {/* {device.name} ({device.id} {device.rssi}) */}
+        Start Scan
+      </Text>
+    </Pressable>
+
+
+
           
-          {
+            {
             ble_devices.length > 0 ? (
               ble_devices.map((device) => (
+              device.name ? (
                 <SelectableDevice key={device.id} device={device} onSelect={btDeviceSelected} />
+              ) : null
               ))
-            ) : ( 
+            ) : (
               <ThemedText>No devices found</ThemedText>
             )
-          }
+            }
         
       </ThemedView>
 

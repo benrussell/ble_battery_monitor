@@ -1,3 +1,4 @@
+
 import { StyleSheet, Image, Platform } from 'react-native';
 
 import { Collapsible } from '@/components/Collapsible';
@@ -7,7 +8,41 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
+import {ble_mgr} from './index';
+import { useEffect, useState } from 'react';
+import { Dimensions } from 'react-native';
+
+
+import React from 'react';
+import { View } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
+import Svg, { Circle, Rect } from 'react-native-svg';
+
+
+import { signal_log } from './index';
+
+
+// const data = [40, 50, 80, 120, 240, 480, 140, 110];
+const data = signal_log;
+
+
+const screenWidth = Dimensions.get('window').width;
+
+
+
 export default function TabTwoScreen() {
+
+	const [dynamicData, setDynamicData] = useState(signal_log);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setDynamicData([...signal_log]); // Update state with the latest signal_log
+		}, 1000); // Adjust the interval as needed
+
+		return () => clearInterval(interval); // Cleanup on unmount
+	}, []);
+
+
   return (
 	<ParallaxScrollView
 	  headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -22,22 +57,46 @@ export default function TabTwoScreen() {
 	  <ThemedView style={styles.titleContainer}>
 		<ThemedText type="title">Details Page</ThemedText>
 	  </ThemedView>
-	  <ThemedText>This app includes example code to help you get started.</ThemedText>
-	  <Collapsible title="File-based routing">
-		<ThemedText>
-		  This app has two screens:{' '}
-		  <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-		  <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-		</ThemedText>
-		<ThemedText>
-		  The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-		  sets up the tab navigator.
-		</ThemedText>
-		<ExternalLink href="https://docs.expo.dev/router/introduction">
-		  <ThemedText type="link">Learn more</ThemedText>
-		</ExternalLink>
-	  </Collapsible>
-	  
+	  <ThemedText>HRM Graph</ThemedText>
+
+	<View>
+			<LineChart				
+				data={{
+					labels: [], //data.map((_, index) => `Point ${index + 1}`),
+					datasets: [
+						{
+							data: [-30, ...data, -95]
+						},
+					],
+				}}
+				width={screenWidth - 40} // Adjust width with padding
+				height={220}
+				chartConfig={{
+					backgroundColor: '#ffffff',
+					backgroundGradientFrom: '#ffffff',
+					backgroundGradientTo: '#ffffff',
+					decimalPlaces: 0,
+					color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+					labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+					style: {
+						borderRadius: 16,
+					},
+					propsForDots: {
+						r: '0',
+						strokeWidth: '0',
+						stroke: '#ffa726',
+					},
+				}}
+				style={{
+					marginVertical: 8,
+					borderRadius: 16,
+					alignSelf: 'center',
+				}}
+				fromZero={false}
+				yLabelsOffset={10}
+			/>
+		</View>
+
 	</ParallaxScrollView>
   );
 }
@@ -54,3 +113,4 @@ const styles = StyleSheet.create({
 	gap: 8,
   },
 });
+
