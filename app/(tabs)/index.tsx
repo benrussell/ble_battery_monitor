@@ -58,6 +58,27 @@ async function checkBlePermissions() {
 
 
 
+
+
+
+function btDeviceSelected(device: any): void {
+  console.log(`Selected device: ${device.name} (${device.id})`);
+  // You can add additional logic here, such as connecting to the device
+  ble_mgr.connectToDevice(device.id)
+    .then((connectedDevice) => {
+      console.log(`Connected to device: ${connectedDevice.name} (${connectedDevice.id})`);
+      // Perform further actions with the connected device if needed
+    })
+    .catch((error) => {
+      console.error(`Failed to connect to device: ${device.name} (${device.id})`, error);
+    });
+}
+
+
+
+
+
+
 export default function HomeScreen() {
 
 // Inside the HomeScreen component
@@ -105,7 +126,6 @@ useEffect(() => {
 
 
 
-  
 
   return (
     <ParallaxScrollView
@@ -117,33 +137,28 @@ useEffect(() => {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">ble?</ThemedText>
+        <ThemedText type="title">BLE Devices</ThemedText>
         <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Device List</ThemedText>
           
           {ble_devices.length > 0 ? (
             ble_devices.map((device) => (
-              <ThemedText key={device.id}>
-                {device.name || 'Unnamed Device'} ({device.id}) 
-                {device.localName || '??'}
-              </ThemedText>
+              device.name && (
+                <ThemedText
+                  key={device.id}
+                  onPress={() => btDeviceSelected(device)} 
+                  style={{ marginVertical: 8, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 }}
+                  onPressIn={() =>                     
+
+                    console.log(`Pressed: ${device.name}`)}
+                  onPressOut={() => console.log(`Released: ${device.name}`)}
+                >
+                  {device.name} ({device.id})
+                </ThemedText>
+              )
+              
             ))
           ) : (
             <ThemedText>No devices found</ThemedText>
@@ -151,18 +166,7 @@ useEffect(() => {
         
       </ThemedView>
 
-
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-
+      
     </ParallaxScrollView>
   );
 }
