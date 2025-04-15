@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, PermissionsAndroid } from 'react-native';
+import { Image, StyleSheet, Platform, PermissionsAndroid, Pressable, Text } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -68,11 +68,72 @@ function btDeviceSelected(device: any): void {
     .then((connectedDevice) => {
       console.log(`Connected to device: ${connectedDevice.name} (${connectedDevice.id})`);
       // Perform further actions with the connected device if needed
+
+      connectedDevice.discoverAllServicesAndCharacteristics()
+        .then((deviceWithServices) => {
+          console.log(`Discovered services and characteristics for device: ${deviceWithServices.name} (${deviceWithServices.id})`);
+          // You can now interact with the device's services and characteristics
+
+          
+          deviceWithServices.services().then((services) => {
+            services.forEach((service) => {
+              service.characteristics().then((characteristics) => {
+                characteristics.forEach((characteristic) => {
+                  console.log(`Characteristic: ${characteristic.uuid}`);
+                });
+              }).catch((error) => {
+                console.error(`Failed to get characteristics for service: ${service.uuid}`, error);
+              });
+            });
+          }).catch((error) => {
+            console.error(`Failed to get services for device: ${deviceWithServices.name} (${deviceWithServices.id})`, error);
+          });
+
+
+        })
+        .catch((error) => {
+          console.error(`Failed to discover services and characteristics for device: ${connectedDevice.name} (${connectedDevice.id})`, error);
+        });
+
     })
     .catch((error) => {
       console.error(`Failed to connect to device: ${device.name} (${device.id})`, error);
     });
 }
+
+
+
+
+
+
+const SelectableDevice = ({
+	device,
+	onSelect,
+}: {
+	device: { id: string; name: string };
+	onSelect: (device: { id: string; name: string }) => void;
+}) => {
+	const [pressed, setPressed] = useState(false);
+
+	return (
+		<Pressable
+			onPress={() => onSelect(device)}
+			onPressIn={() => setPressed(true)}
+			onPressOut={() => setPressed(false)}
+		>
+			<Text
+				style={{
+					backgroundColor: pressed ? 'red' : '#f0f0f0',
+					padding: 10,
+					borderRadius: 5,
+					marginVertical: 8,
+				}}
+			>
+				{device.name} ({device.id})
+			</Text>
+		</Pressable>
+	);
+};
 
 
 
@@ -127,6 +188,10 @@ useEffect(() => {
 
 
 
+
+
+
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -143,26 +208,15 @@ useEffect(() => {
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Device List</ThemedText>
           
-          {ble_devices.length > 0 ? (
-            ble_devices.map((device) => (
-              device.name && (
-                <ThemedText
-                  key={device.id}
-                  onPress={() => btDeviceSelected(device)} 
-                  style={{ marginVertical: 8, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 }}
-                  onPressIn={() =>                     
-
-                    console.log(`Pressed: ${device.name}`)}
-                  onPressOut={() => console.log(`Released: ${device.name}`)}
-                >
-                  {device.name} ({device.id})
-                </ThemedText>
-              )
-              
-            ))
-          ) : (
-            <ThemedText>No devices found</ThemedText>
-          )}
+          {
+            ble_devices.length > 0 ? (
+              ble_devices.map((device) => (
+                <SelectableDevice key={device.id} device={device} onSelect={btDeviceSelected} />
+              ))
+            ) : ( 
+              <ThemedText>No devices found</ThemedText>
+            )
+          }
         
       </ThemedView>
 
