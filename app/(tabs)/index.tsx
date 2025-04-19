@@ -131,7 +131,7 @@ const SelectableDevice = ({
 	return (
     <Pressable
       onPress={() => {
-        //onSelect(device);
+        onSelect(device);
         navigation.navigate('details', { device })
       }}
       onPressIn={() => setPressed(true)}
