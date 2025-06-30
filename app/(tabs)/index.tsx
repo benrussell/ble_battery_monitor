@@ -72,6 +72,56 @@ async function checkBlePermissions() {
 
 
 
+const BATTERY_SERVICE_UUID = '180F';
+const BATTERY_LEVEL_CHAR_UUID = '2A19';
+
+export async function subscribeBatteryLevel(device, onUpdate) {
+	await device.discoverAllServicesAndCharacteristics();
+	return device.monitorCharacteristicForService(
+		BATTERY_SERVICE_UUID,
+		BATTERY_LEVEL_CHAR_UUID,
+		(error, char) => {
+			if (error) {
+				console.error('Notification error:', error);
+				return;
+			}
+			if (char?.value) {
+				const raw = atob(char.value);
+				const level = raw.charCodeAt(0);
+				onUpdate(level);
+			}
+		}
+	);
+}
+
+
+function notify_batt_level( value: any ){
+  console.log("Battery Level: ", value);
+  // You can add additional logic here, such as updating the UI or storing the value
+
+  signal_log.push(value);
+
+  if (signal_log.length > 10) {
+    signal_log.shift(); // Remove the oldest item to maintain the limit
+  }
+
+
+}
+
+
+
+
+
+
+export var glob_device: any;
+export var glob_notif_subscription: any;
+
+
+async function sub_batt_level(connectedDevice: any) {
+  glob_notif_subscription = await subscribeBatteryLevel(connectedDevice, notify_batt_level);
+}
+
+
 function btDeviceSelected(device: any): void {
 
   console.log(`Selected device: ${device.name} (${device.id})`);
@@ -81,6 +131,9 @@ function btDeviceSelected(device: any): void {
       console.log(`Connected to device: ${connectedDevice.name} (${connectedDevice.id})`);
       // Perform further actions with the connected device if needed
 
+      glob_device = connectedDevice;
+      sub_batt_level( connectedDevice );
+  
       connectedDevice.discoverAllServicesAndCharacteristics()
         .then((deviceWithServices) => {
           console.log(`Discovered services and characteristics for device: ${deviceWithServices.name} (${deviceWithServices.id})`);
@@ -194,24 +247,25 @@ useEffect(() => {
             // Optionally, you can update the RSSI value if needed
             const updatedDevices = prevDevices.map((d) => {
               if (d.id === device.id) {
-                if( device.id == "CC:AC:0C:1B:E0:8F" ){
-                  console.log( "P3: ", device.id, d.rssi, device.rssi);
-                }
-                if( device.id == "C9:2F:AC:B3:7D:68" ){
-                    console.log( "In: ", device.id, d.rssi, device.rssi, "Timestamp: ", new Date().toISOString());
-                  if (device.rssi !== null) {
-                    signal_log.push(device.rssi);
+                // This is the solar battery proto
+                // if( device.id == "FC:F5:C4:56:2B:02" ){
+                //   console.log( "P3: ", device.id, d.rssi, device.rssi);
+                // }
 
-                    ble_lastUpdateTime = Date.now();
+                // This is the Instinct MAC
+                // if( device.id == "C9:2F:AC:B3:7D:68" ){
+                //     console.log( "In: ", device.id, d.rssi, device.rssi, "Timestamp: ", new Date().toISOString());
+                //   if (device.rssi !== null) {
+                //     signal_log.push(device.rssi);
 
-                    if (signal_log.length > 50) {
-                      signal_log.shift(); // Remove the oldest item to maintain the limit
-                    }
-                  }
-                    // console.log(device)
+                //     ble_lastUpdateTime = Date.now();
 
-
-                }
+                //     if (signal_log.length > 50) {
+                //       signal_log.shift(); // Remove the oldest item to maintain the limit
+                //     }
+                //   }
+                //     // console.log(device)
+                // }
 
                 //console.log( "update: ", device.id, d.rssi, device.rssi);
                 return { ...d, rssi: device.rssi };
