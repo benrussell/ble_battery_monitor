@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "mybleapp.app"
-               BlueprintName = "mybleapp"
-               ReferencedContainer = "container:mybleapp.xcodeproj">
+               BuildableName = "BatteryMonitor.app"
+               BlueprintName = "BatteryMonitor"
+               ReferencedContainer = "container:BatteryMonitor.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "mybleappTests.xctest"
-               BlueprintName = "mybleappTests"
-               ReferencedContainer = "container:mybleapp.xcodeproj">
+               BuildableName = "BatteryMonitorTests.xctest"
+               BlueprintName = "BatteryMonitorTests"
+               ReferencedContainer = "container:BatteryMonitor.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "mybleapp.app"
-            BlueprintName = "mybleapp"
-            ReferencedContainer = "container:mybleapp.xcodeproj">
+            BuildableName = "BatteryMonitor.app"
+            BlueprintName = "BatteryMonitor"
+            ReferencedContainer = "container:BatteryMonitor.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "mybleapp.app"
-            BlueprintName = "mybleapp"
-            ReferencedContainer = "container:mybleapp.xcodeproj">
+            BuildableName = "BatteryMonitor.app"
+            BlueprintName = "BatteryMonitor"
+            ReferencedContainer = "container:BatteryMonitor.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

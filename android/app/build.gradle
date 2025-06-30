@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.bendavidson.mybleapp'
+    namespace 'com.x_plugins.battery_monitor'
     defaultConfig {
-        applicationId 'com.bendavidson.mybleapp'
+        applicationId 'com.x_plugins.battery_monitor'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

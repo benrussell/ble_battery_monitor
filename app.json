@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-ble-app",
-    "slug": "my-ble-app",
+    "name": "Battery Monitor",
+    "slug": "battery-monitor",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bendavidson.mybleapp"
+      "bundleIdentifier": "com.x-plugins.battery-monitor"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,7 @@
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT"
       ],
-      "package": "com.bendavidson.mybleapp"
+      "package": "com.x_plugins.battery_monitor"
     },
     "web": {
       "bundler": "metro",

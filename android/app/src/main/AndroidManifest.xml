@@ -31,7 +31,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
-        <data android:scheme="com.bendavidson.mybleapp"/>
+        <data android:scheme="com.x_plugins.battery_monitor"/>
       </intent-filter>
     </activity>
   </application>

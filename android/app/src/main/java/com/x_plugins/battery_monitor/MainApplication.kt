@@ -1,4 +1,4 @@
-package com.bendavidson.mybleapp
+package com.x_plugins.battery_monitor
 
 import android.app.Application
 import android.content.res.Configuration

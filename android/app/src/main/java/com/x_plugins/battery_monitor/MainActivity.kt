@@ -1,4 +1,4 @@
-package com.bendavidson.mybleapp
+package com.x_plugins.battery_monitor
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

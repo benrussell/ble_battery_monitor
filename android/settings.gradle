@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'my-ble-app'
+rootProject.name = 'Battery Monitor'
 
 dependencyResolutionManagement {
   versionCatalogs {
