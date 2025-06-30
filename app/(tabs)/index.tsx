@@ -25,7 +25,7 @@ export const ble_mgr = new BleManager();
 const ble_devices: Array<any> = [];
 
 
-export var signal_log: number[] = [-45];
+export var signal_log: number[] = [85];
 export var ble_lastUpdateTime: number = 0;
 
 
@@ -101,7 +101,7 @@ function notify_batt_level( value: any ){
 
   signal_log.push(value);
 
-  if (signal_log.length > 10) {
+  if (signal_log.length > 60) {
     signal_log.shift(); // Remove the oldest item to maintain the limit
   }
 
@@ -241,7 +241,13 @@ useEffect(() => {
           setDevices((prevDevices) => {
             const exists = prevDevices.some((d) => d.id === device.id);
             if (!exists) {
-              return [...prevDevices, device];
+
+              if( device.name == "Battery Monitor" ){
+                return [...prevDevices, device];
+              }
+
+              return [...prevDevices];
+              
             }
             //console.log("Device already exists in the list:", device.id, device.rssi);
             // Optionally, you can update the RSSI value if needed
@@ -304,11 +310,12 @@ useEffect(() => {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">BLE Devices</ThemedText>
+        <ThemedText type="title">Battery Monitor</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Device List</ThemedText>
+        <ThemedText type="subtitle">Select Device</ThemedText>
+
 
 
         <Pressable
