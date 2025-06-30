@@ -20,6 +20,7 @@ import Svg, { Circle, Rect } from 'react-native-svg';
 
 
 import { signal_log, ble_lastUpdateTime } from './index';
+import { Button } from 'react-native';
 
 
 // const data = [40, 50, 80, 120, 240, 480, 140, 110];
@@ -51,18 +52,60 @@ function LastUpdateLabel() {
 }
 
 
+import { glob_device, glob_notif_subscription } from './index';
+
+
+async function disconnectBLE() {
+	
+	await ble_mgr.cancelDeviceConnection(glob_device.id);
+	if( glob_notif_subscription ){
+		await glob_notif_subscription.remove();
+	
+	}
+	
+}
+
+
+function queryBLEProperty() {
+	console.log('reading battery leevel: ', glob_device);
+	readBatteryLevel( glob_device );	
+}
+
+
+// Assuming you have a connected device object `device`
+const BATTERY_SERVICE_UUID = '180F';
+const BATTERY_LEVEL_CHAR_UUID = '2A19';
+
+async function readBatteryLevel(device: any) {
+	const services = await device.discoverAllServicesAndCharacteristics();
+	const characteristic = await device.readCharacteristicForService(
+		BATTERY_SERVICE_UUID,
+		BATTERY_LEVEL_CHAR_UUID
+	);
+	const batteryLevel = characteristic.value;
+	console.log('Battery Level:', batteryLevel);
+}
+
+
 
 export default function TabTwoScreen() {
 
 	const [dynamicData, setDynamicData] = useState(signal_log);
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setDynamicData([...signal_log]); // Update state with the latest signal_log
-		}, 1000); // Adjust the interval as needed
+	const [batteryLevel, setBatteryLevel] = useState<number>(0);
 
-		return () => clearInterval(interval); // Cleanup on unmount
-	}, []);
+
+	useEffect(() => {
+			const interval = setInterval(() => {
+				setDynamicData([...signal_log]); // Update state with the latest signal_log
+				setBatteryLevel(signal_log[signal_log.length - 1]); // Update battery level from signal_log
+			}, 1000); // Adjust the interval as needed
+
+			return () => clearInterval(interval); // Cleanup on unmount
+		}, [signal_log, batteryLevel]);
+
+
+
 
 
   return (
@@ -77,11 +120,10 @@ export default function TabTwoScreen() {
 			/>
 		  }>
 		  <ThemedView style={styles.titleContainer}>
-			<ThemedText type="title">Details Page</ThemedText>
+			<ThemedText type="subtitle">Battery Charge</ThemedText>
 		  </ThemedView>
-		  <ThemedText>HRM Graph</ThemedText>
-		  <LastUpdateLabel />
-	  
+		<ThemedText type="title" style={{ textAlign: 'center' }}>{batteryLevel}%</ThemedText>
+		  
 	<View>
 			<LineChart				
 				data={{
@@ -92,8 +134,8 @@ export default function TabTwoScreen() {
 						},
 					],
 				}}
-				width={screenWidth - 40} // Adjust width with padding
-				height={220}
+				width={screenWidth - 0} // Adjust width with padding
+				height={200}
 				chartConfig={{
 					backgroundColor: '#ffffff',
 					backgroundGradientFrom: '#ffffff',
@@ -111,7 +153,7 @@ export default function TabTwoScreen() {
 					},
 				}}
 				style={{
-					marginVertical: 8,
+					marginVertical: 0,
 					borderRadius: 16,
 					alignSelf: 'center',
 				}}
@@ -119,6 +161,26 @@ export default function TabTwoScreen() {
 				yLabelsOffset={10}
 			/>
 		</View>
+
+		{/* <LastUpdateLabel /> */}
+
+		<View>			
+			<Button
+				title="Disconnect"
+				onPress={disconnectBLE}
+				color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
+			/>
+		</View>
+
+		{/* <View>			
+			<Button
+				title="Query BLE Property"
+				onPress={queryBLEProperty}
+				color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
+			/>
+		</View> */}
+	  
+
 
 	</ParallaxScrollView>
   );
