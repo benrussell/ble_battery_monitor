@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, PermissionsAndroid, Pressable, Text, View, Button } from 'react-native';
+import { Image, StyleSheet, Platform, PermissionsAndroid, Pressable, Text, View, Button, Alert } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -113,7 +113,7 @@ function notify_batt_level(value: any) {
 
 
 
-export var glob_device: any;
+export var glob_device: any = null;
 export var glob_notif_subscription: any;
 
 
@@ -168,9 +168,6 @@ function btDeviceSelected(device: any): void {
 
 
 
-function disconnectBLE() { }
-
-
 
 
 const SelectableDevice = ({
@@ -185,38 +182,28 @@ const SelectableDevice = ({
 
   return (
     <Pressable
-      onPress={() => {
-        onSelect(device);
-        navigation.navigate('details', { device })
-      }}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
+    // onPress={() => {
+    //   onSelect(device);
+    //   navigation.navigate('details', { device })
+    // }}
+    //onPressIn={() => setPressed(true)}
+    //onPressOut={() => setPressed(false)}
     >
-      <View style={{
-        backgroundColor: pressed ? 'blue' : '#f0f0f0',
-        padding: 10,
-        borderRadius: 10,
-        marginVertical: 8,
-      }}
-      >
-        <Text>{device.name}</Text>
-        <Text>({device.id} {device.rssi})</Text>
-      </View>
 
       <View>
         <Button
-          title="Disconnect"
-          onPress={disconnectBLE}
+          title={`${device.name} ${device.id}  ${device.rssi}`}
+          onPress={() => {
+            onSelect(device);
+            navigation.navigate('details', { device })
+          }}
           color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
         />
       </View>
 
-
     </Pressable>
   );
 };
-
-
 
 
 
@@ -226,12 +213,7 @@ export default function HomeScreen() {
   // Inside the HomeScreen component
   const [ble_devices, setDevices] = useState<Array<any>>([]);
 
-
-
-
-
-
-
+  const [ble_scanning, setBleScanning] = useState(false);
 
 
   useEffect(() => {
@@ -243,11 +225,14 @@ export default function HomeScreen() {
 
         ble_mgr.startDeviceScan(null, { scanMode: ScanMode.LowLatency }, (error, device) => {
           if (error) {
-            console.error('Device scan error:', error);
+            // console.error('Device scan error:', error);
+            Alert.alert('Device Scan Error', error.message);
+            setBleScanning(false);
             return;
           }
 
           if (device) {
+            setBleScanning(true);
             // console.log(device);
             // Avoid duplicates by checking if the device is already in the array
             setDevices((prevDevices) => {
@@ -312,31 +297,6 @@ export default function HomeScreen() {
         <ThemedText type="subtitle">Select Device</ThemedText>
 
 
-
-        <Pressable
-          onPress={() => {
-            ble_mgr.stopDeviceScan();
-            //onSelect(device);
-            // navigation.navigate('Details', { device })
-          }}
-        // onPressIn={() => setPressed(true)}
-        // onPressOut={() => setPressed(false)}
-        >
-          <Text
-            style={{
-              // backgroundColor: pressed ? 'red' : '#f0f0f0',
-              padding: 10,
-              borderRadius: 5,
-              marginVertical: 8,
-            }}
-          >
-            {/* {device.name} ({device.id} {device.rssi}) */}
-            Stop Scan
-          </Text>
-        </Pressable>
-
-
-
         {
           ble_devices.length > 0 ? (
             ble_devices.map((device) => (
@@ -345,9 +305,11 @@ export default function HomeScreen() {
               ) : null
             ))
           ) : (
-            <ThemedText>No devices found</ThemedText>
+            <ThemedText>No BlueTooth devices found.</ThemedText>
           )
         }
+
+        <ThemedText>{ble_scanning ? 'Scanning...' : 'Not Scanning'}</ThemedText>
 
       </ThemedView>
 
