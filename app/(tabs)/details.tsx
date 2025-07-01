@@ -96,13 +96,15 @@ export default function TabTwoScreen() {
 		signal_log.push(85); // Reset signal_log to an empty state
 
 
-		await ble_mgr.cancelDeviceConnection(glob_device.id);
-	
 		if( glob_notif_subscription ){
-			await glob_notif_subscription.remove();
-		
+			console.log("removing notification subscription");
+			await glob_notif_subscription.remove();		
 		}
 
+		console.log("removing device connection");
+		await ble_mgr.cancelDeviceConnection(glob_device.id);
+	
+		
 	
 		console.log("switching tab to /");
 		router.push({
@@ -142,6 +144,14 @@ export default function TabTwoScreen() {
 		<ThemedText type="title" style={{ textAlign: 'center' }}>{batteryLevel}%</ThemedText>
 		  
 		  <LastUpdateLabel />
+
+
+		  <Svg height="100" width="200">
+			<Rect x="15" y="16" width={batteryLevel} height="28" stroke="green" strokeWidth="2" fill="green" />
+			<Rect x="15" y="15" width="100" height="30" stroke="black" strokeWidth="2" fill="none" />			
+			
+		</Svg>
+
 
 	<View>
 			<LineChart				
@@ -190,6 +200,11 @@ export default function TabTwoScreen() {
 				color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
 			/>
 		</View>
+
+		<Svg height="100" width="100">
+			<Circle cx="50" cy="50" r="40" stroke="blue" strokeWidth="2.5" fill="green" />
+			<Rect x="15" y="15" width="70" height="70" stroke="red" strokeWidth="2" fill="none" />
+		</Svg>
 
 		{/* <View>			
 			<Button
