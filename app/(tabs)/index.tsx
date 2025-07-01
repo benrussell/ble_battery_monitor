@@ -60,8 +60,8 @@ async function requestBlePermissions() {
 async function checkBlePermissions() {
   if (Platform.OS === 'android') {
     const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN) &&
-                    await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT) &&
-                    await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT) &&
+      await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
     return granted;
   }
   return true; // Assume permissions are granted on non-Android platforms
@@ -76,26 +76,26 @@ const BATTERY_SERVICE_UUID = '180F';
 const BATTERY_LEVEL_CHAR_UUID = '2A19';
 
 export async function subscribeBatteryLevel(device: any, onUpdate: any) {
-	await device.discoverAllServicesAndCharacteristics();
-	return device.monitorCharacteristicForService(
-		BATTERY_SERVICE_UUID,
-		BATTERY_LEVEL_CHAR_UUID,
-		(error: any, char: any) => {
-			if (error) {
-				console.log('subscribeBatteryLevel(): Notification error:', error);
-				return;
-			}
-			if (char?.value) {
-				const raw = atob(char.value);
-				const level = raw.charCodeAt(0);
-				onUpdate(level);
-			}
-		}
-	);
+  await device.discoverAllServicesAndCharacteristics();
+  return device.monitorCharacteristicForService(
+    BATTERY_SERVICE_UUID,
+    BATTERY_LEVEL_CHAR_UUID,
+    (error: any, char: any) => {
+      if (error) {
+        console.log('subscribeBatteryLevel(): Notification error:', error);
+        return;
+      }
+      if (char?.value) {
+        const raw = atob(char.value);
+        const level = raw.charCodeAt(0);
+        onUpdate(level);
+      }
+    }
+  );
 }
 
 
-function notify_batt_level( value: any ){
+function notify_batt_level(value: any) {
   console.log("Battery Level: ", value);
   // You can add additional logic here, such as updating the UI or storing the value
 
@@ -132,14 +132,14 @@ function btDeviceSelected(device: any): void {
       // Perform further actions with the connected device if needed
 
       glob_device = connectedDevice;
-      sub_batt_level( connectedDevice );
-  
+      sub_batt_level(connectedDevice);
+
       connectedDevice.discoverAllServicesAndCharacteristics()
         .then((deviceWithServices) => {
           console.log(`Discovered services and characteristics for device: ${deviceWithServices.name} (${deviceWithServices.id})`);
           // You can now interact with the device's services and characteristics
 
-          
+
           deviceWithServices.services().then((services) => {
             services.forEach((service) => {
               service.characteristics().then((characteristics) => {
@@ -168,22 +168,22 @@ function btDeviceSelected(device: any): void {
 
 
 
-function disconnectBLE() {}
+function disconnectBLE() { }
 
 
 
 
 const SelectableDevice = ({
-	device,
-	onSelect,
+  device,
+  onSelect,
 }: {
-	device: { id: string; name: string, rssi: number };
-	onSelect: (device: { id: string; name: string }) => void;
+  device: { id: string; name: string, rssi: number };
+  onSelect: (device: { id: string; name: string }) => void;
 }) => {
   const [pressed, setPressed] = useState(false);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  
-	return (
+
+  return (
     <Pressable
       onPress={() => {
         onSelect(device);
@@ -193,27 +193,27 @@ const SelectableDevice = ({
       onPressOut={() => setPressed(false)}
     >
       <View style={{
-          backgroundColor: pressed ? 'blue' : '#f0f0f0',
-          padding: 10,
-          borderRadius: 10,
-          marginVertical: 8,
-        }}
+        backgroundColor: pressed ? 'blue' : '#f0f0f0',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 8,
+      }}
       >
         <Text>{device.name}</Text>
         <Text>({device.id} {device.rssi})</Text>
       </View>
 
-      <View>			
-            <Button
-              title="Disconnect"
-              onPress={disconnectBLE}
-              color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
-            />
-          </View>
-      
-      
+      <View>
+        <Button
+          title="Disconnect"
+          onPress={disconnectBLE}
+          color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
+        />
+      </View>
+
+
     </Pressable>
-	);
+  );
 };
 
 
@@ -223,8 +223,8 @@ const SelectableDevice = ({
 
 export default function HomeScreen() {
 
-// Inside the HomeScreen component
-const [ble_devices, setDevices] = useState<Array<any>>([]);
+  // Inside the HomeScreen component
+  const [ble_devices, setDevices] = useState<Array<any>>([]);
 
 
 
@@ -234,66 +234,66 @@ const [ble_devices, setDevices] = useState<Array<any>>([]);
 
 
 
-useEffect(() => {
+  useEffect(() => {
 
-  const startBleScan = async () => {
-    const hasPermissions = await checkBlePermissions();
-    if (hasPermissions) {
-      console.log('BLE permissions are granted. Starting device scan...');
+    const startBleScan = async () => {
+      const hasPermissions = await checkBlePermissions();
+      if (hasPermissions) {
+        console.log('BLE permissions are granted. Starting device scan...');
 
-      ble_mgr.startDeviceScan(null, { scanMode: ScanMode.LowLatency }, (error, device) => {
-        if (error) {
-          console.error('Device scan error:', error);
-          return;
-        }
+        ble_mgr.startDeviceScan(null, { scanMode: ScanMode.LowLatency }, (error, device) => {
+          if (error) {
+            console.error('Device scan error:', error);
+            return;
+          }
 
-        if (device) {
-          // console.log(device);
-          // Avoid duplicates by checking if the device is already in the array
-          setDevices((prevDevices) => {
-            const exists = prevDevices.some((d) => d.id === device.id);
-            if (!exists) {
+          if (device) {
+            // console.log(device);
+            // Avoid duplicates by checking if the device is already in the array
+            setDevices((prevDevices) => {
+              const exists = prevDevices.some((d) => d.id === device.id);
+              if (!exists) {
 
-              // if( device.name == "Battery Monitor" ){
-              //   return [...prevDevices, device];
-              // }
+                // if( device.name == "Battery Monitor" ){
+                //   return [...prevDevices, device];
+                // }
 
-              // return [...prevDevices];
+                // return [...prevDevices];
 
-              return [...prevDevices, device];
-              
-            }
-            //console.log("Device already exists in the list:", device.id, device.rssi);
-            // Optionally, you can update the RSSI value if needed
-            const updatedDevices = prevDevices.map((d) => {
-              if (d.id === device.id) {
-                
-                //console.log( "update: ", device.id, d.rssi, device.rssi);
-                return { ...d, rssi: device.rssi };
+                return [...prevDevices, device];
+
               }
-              return d;
+              //console.log("Device already exists in the list:", device.id, device.rssi);
+              // Optionally, you can update the RSSI value if needed
+              const updatedDevices = prevDevices.map((d) => {
+                if (d.id === device.id) {
+
+                  //console.log( "update: ", device.id, d.rssi, device.rssi);
+                  return { ...d, rssi: device.rssi };
+                }
+                return d;
+              });
+              return updatedDevices;
+              //return prevDevices;
             });
-            return updatedDevices;
-            //return prevDevices;
-          });
-        }
-      });
-    } else {
-      console.log('BLE permissions are not granted. Requesting permissions...');
-      await requestBlePermissions();
-      // Retry scanning after requesting permissions
-      startBleScan();
-    }
-  };
+          }
+        });
+      } else {
+        console.log('BLE permissions are not granted. Requesting permissions...');
+        await requestBlePermissions();
+        // Retry scanning after requesting permissions
+        startBleScan();
+      }
+    };
 
-  startBleScan();
+    startBleScan();
 
-  // Cleanup function to stop scanning when the component unmounts
-  return () => {
-    ble_mgr.stopDeviceScan();
-    console.log('Stopped BLE device scan.');
-  };
-}, []);
+    // Cleanup function to stop scanning when the component unmounts
+    return () => {
+      ble_mgr.stopDeviceScan();
+      console.log('Stopped BLE device scan.');
+    };
+  }, []);
 
   return (
     <ParallaxScrollView
@@ -314,44 +314,44 @@ useEffect(() => {
 
 
         <Pressable
-      onPress={() => {
-        ble_mgr.stopDeviceScan();
-        //onSelect(device);
-        // navigation.navigate('Details', { device })
-      }}
-      // onPressIn={() => setPressed(true)}
-      // onPressOut={() => setPressed(false)}
-    >
-      <Text
-        style={{
-          // backgroundColor: pressed ? 'red' : '#f0f0f0',
-          padding: 10,
-          borderRadius: 5,
-          marginVertical: 8,
-        }}
-      >
-        {/* {device.name} ({device.id} {device.rssi}) */}
-        Stop Scan
-      </Text>
-    </Pressable>
+          onPress={() => {
+            ble_mgr.stopDeviceScan();
+            //onSelect(device);
+            // navigation.navigate('Details', { device })
+          }}
+        // onPressIn={() => setPressed(true)}
+        // onPressOut={() => setPressed(false)}
+        >
+          <Text
+            style={{
+              // backgroundColor: pressed ? 'red' : '#f0f0f0',
+              padding: 10,
+              borderRadius: 5,
+              marginVertical: 8,
+            }}
+          >
+            {/* {device.name} ({device.id} {device.rssi}) */}
+            Stop Scan
+          </Text>
+        </Pressable>
 
 
-          
-            {
-            ble_devices.length > 0 ? (
-              ble_devices.map((device) => (
+
+        {
+          ble_devices.length > 0 ? (
+            ble_devices.map((device) => (
               device.name ? (
                 <SelectableDevice key={device.id} device={device} onSelect={btDeviceSelected} />
               ) : null
-              ))
-            ) : (
-              <ThemedText>No devices found</ThemedText>
-            )
-            }
-        
+            ))
+          ) : (
+            <ThemedText>No devices found</ThemedText>
+          )
+        }
+
       </ThemedView>
 
-      
+
     </ParallaxScrollView>
   );
 }
