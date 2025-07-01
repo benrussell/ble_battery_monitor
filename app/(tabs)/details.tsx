@@ -53,17 +53,9 @@ function LastUpdateLabel() {
 
 
 import { glob_device, glob_notif_subscription } from './index';
+import { useRouter } from 'expo-router';
 
 
-async function disconnectBLE() {
-	
-	await ble_mgr.cancelDeviceConnection(glob_device.id);
-	if( glob_notif_subscription ){
-		await glob_notif_subscription.remove();
-	
-	}
-	
-}
 
 
 function queryBLEProperty() {
@@ -94,6 +86,34 @@ export default function TabTwoScreen() {
 
 	const [batteryLevel, setBatteryLevel] = useState<number>(0);
 
+	const router = useRouter();
+
+
+	async function disconnectBLE() {
+		console.log("disconnecting from device: ", glob_device);
+
+		signal_log.length = 0;
+		signal_log.push(85); // Reset signal_log to an empty state
+
+
+		await ble_mgr.cancelDeviceConnection(glob_device.id);
+	
+		if( glob_notif_subscription ){
+			await glob_notif_subscription.remove();
+		
+		}
+
+	
+		console.log("switching tab to /");
+		router.push({
+			pathname: '/(tabs)',
+			params: {},
+		}); // Navigate to the main tab screen after disconnecting
+	
+	
+	}
+	
+
 
 	useEffect(() => {
 			const interval = setInterval(() => {
@@ -103,9 +123,6 @@ export default function TabTwoScreen() {
 
 			return () => clearInterval(interval); // Cleanup on unmount
 		}, [signal_log, batteryLevel]);
-
-
-
 
 
   return (
@@ -119,18 +136,20 @@ export default function TabTwoScreen() {
 			  style={styles.headerImage}
 			/>
 		  }>
-		  <ThemedView style={styles.titleContainer}>
-			<ThemedText type="subtitle">Battery Charge</ThemedText>
+		  <ThemedView style={styles.titleContainer} >
+			<ThemedText  style={{ textAlign: 'center' }} type="subtitle">Battery Charge</ThemedText>
 		  </ThemedView>
 		<ThemedText type="title" style={{ textAlign: 'center' }}>{batteryLevel}%</ThemedText>
 		  
+		  <LastUpdateLabel />
+
 	<View>
 			<LineChart				
 				data={{
 					labels: [], //data.map((_, index) => `Point ${index + 1}`),
 					datasets: [
 						{
-							data: data
+							data: signal_log
 						},
 					],
 				}}
@@ -144,7 +163,7 @@ export default function TabTwoScreen() {
 					color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
 					labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
 					style: {
-						borderRadius: 16,
+						borderRadius: 8,
 					},
 					propsForDots: {
 						r: '0',
@@ -154,11 +173,11 @@ export default function TabTwoScreen() {
 				}}
 				style={{
 					marginVertical: 0,
-					borderRadius: 16,
+					borderRadius: 8,
 					alignSelf: 'center',
 				}}
-				fromZero={false}
-				yLabelsOffset={10}
+				fromZero={true}
+				yLabelsOffset={4}
 			/>
 		</View>
 
