@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, PermissionsAndroid, Pressable, Text } from 'react-native';
+import { Image, StyleSheet, Platform, PermissionsAndroid, Pressable, Text, View, Button } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -75,14 +75,14 @@ async function checkBlePermissions() {
 const BATTERY_SERVICE_UUID = '180F';
 const BATTERY_LEVEL_CHAR_UUID = '2A19';
 
-export async function subscribeBatteryLevel(device, onUpdate) {
+export async function subscribeBatteryLevel(device: any, onUpdate: any) {
 	await device.discoverAllServicesAndCharacteristics();
 	return device.monitorCharacteristicForService(
 		BATTERY_SERVICE_UUID,
 		BATTERY_LEVEL_CHAR_UUID,
-		(error, char) => {
+		(error: any, char: any) => {
 			if (error) {
-				console.error('Notification error:', error);
+				console.log('subscribeBatteryLevel(): Notification error:', error);
 				return;
 			}
 			if (char?.value) {
@@ -101,7 +101,7 @@ function notify_batt_level( value: any ){
 
   signal_log.push(value);
 
-  if (signal_log.length > 60) {
+  if (signal_log.length > 30) {
     signal_log.shift(); // Remove the oldest item to maintain the limit
   }
 
@@ -168,6 +168,8 @@ function btDeviceSelected(device: any): void {
 
 
 
+function disconnectBLE() {}
+
 
 
 
@@ -190,16 +192,26 @@ const SelectableDevice = ({
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
-      <Text
-        style={{
-          backgroundColor: pressed ? 'red' : '#f0f0f0',
+      <View style={{
+          backgroundColor: pressed ? 'blue' : '#f0f0f0',
           padding: 10,
-          borderRadius: 5,
+          borderRadius: 10,
           marginVertical: 8,
         }}
       >
-        {device.name} ({device.id} {device.rssi})
-      </Text>
+        <Text>{device.name}</Text>
+        <Text>({device.id} {device.rssi})</Text>
+      </View>
+
+      <View>			
+            <Button
+              title="Disconnect"
+              onPress={disconnectBLE}
+              color={Platform.OS === 'ios' ? '#007AFF' : '#2196F3'}
+            />
+          </View>
+      
+      
     </Pressable>
 	);
 };
@@ -242,37 +254,20 @@ useEffect(() => {
             const exists = prevDevices.some((d) => d.id === device.id);
             if (!exists) {
 
-              if( device.name == "Battery Monitor" ){
-                return [...prevDevices, device];
-              }
+              // if( device.name == "Battery Monitor" ){
+              //   return [...prevDevices, device];
+              // }
 
-              return [...prevDevices];
+              // return [...prevDevices];
+
+              return [...prevDevices, device];
               
             }
             //console.log("Device already exists in the list:", device.id, device.rssi);
             // Optionally, you can update the RSSI value if needed
             const updatedDevices = prevDevices.map((d) => {
               if (d.id === device.id) {
-                // This is the solar battery proto
-                // if( device.id == "FC:F5:C4:56:2B:02" ){
-                //   console.log( "P3: ", device.id, d.rssi, device.rssi);
-                // }
-
-                // This is the Instinct MAC
-                // if( device.id == "C9:2F:AC:B3:7D:68" ){
-                //     console.log( "In: ", device.id, d.rssi, device.rssi, "Timestamp: ", new Date().toISOString());
-                //   if (device.rssi !== null) {
-                //     signal_log.push(device.rssi);
-
-                //     ble_lastUpdateTime = Date.now();
-
-                //     if (signal_log.length > 50) {
-                //       signal_log.shift(); // Remove the oldest item to maintain the limit
-                //     }
-                //   }
-                //     // console.log(device)
-                // }
-
+                
                 //console.log( "update: ", device.id, d.rssi, device.rssi);
                 return { ...d, rssi: device.rssi };
               }
@@ -339,31 +334,6 @@ useEffect(() => {
         Stop Scan
       </Text>
     </Pressable>
-
-
-
-    <Pressable
-      onPress={() => {
-        //startBleScan();
-        //onSelect(device);
-        // navigation.navigate('Details', { device })
-      }}
-      // onPressIn={() => setPressed(true)}
-      // onPressOut={() => setPressed(false)}
-    >
-      <Text
-        style={{
-          // backgroundColor: pressed ? 'red' : '#f0f0f0',
-          padding: 10,
-          borderRadius: 5,
-          marginVertical: 8,
-        }}
-      >
-        {/* {device.name} ({device.id} {device.rssi}) */}
-        Start Scan
-      </Text>
-    </Pressable>
-
 
 
           
