@@ -1,5 +1,7 @@
 import { Image, StyleSheet, Platform, PermissionsAndroid, Pressable, Text, View, Button, Alert } from 'react-native';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -19,13 +21,14 @@ type RootStackParamList = {
 
 
 import { ScanMode } from 'react-native-ble-plx';
+import { FlatList } from 'react-native-gesture-handler';
 
 export const ble_mgr = new BleManager();
 
 const ble_devices: Array<any> = [];
 
 
-export var signal_log: number[] = [85];
+export var signal_log: number[] = [85]; //battery level graph data
 export var ble_lastUpdateTime: number = 0;
 
 
@@ -83,6 +86,7 @@ export async function subscribeBatteryLevel(device: any, onUpdate: any) {
     (error: any, char: any) => {
       if (error) {
         console.log('subscribeBatteryLevel(): Notification error:', error);
+        Alert.alert('Notification Error', error.message);
         return;
       }
       if (char?.value) {
@@ -98,6 +102,8 @@ export async function subscribeBatteryLevel(device: any, onUpdate: any) {
 function notify_batt_level(value: any) {
   console.log("Battery Level: ", value);
   // You can add additional logic here, such as updating the UI or storing the value
+
+  ble_lastUpdateTime = Date.now();
 
   signal_log.push(value);
 
@@ -216,6 +222,18 @@ export default function HomeScreen() {
   const [ble_scanning, setBleScanning] = useState(false);
 
 
+  const [ble_refreshing, setBleRefreshing] = useState(false);
+
+  const refreshBLEList = async () => {		
+    setBleRefreshing(true);
+    setTimeout(() => {
+			//setData((prev) => [...prev, prev.length + 1]);
+			setBleRefreshing(false);
+		}, 1000);
+  }
+
+
+
   useEffect(() => {
 
     const startBleScan = async () => {
@@ -238,16 +256,18 @@ export default function HomeScreen() {
             setDevices((prevDevices) => {
               const exists = prevDevices.some((d) => d.id === device.id);
               if (!exists) {
+                // console.log("New device found:", device.id, device.rssi, device.name);
 
-                // if( device.name == "Battery Monitor" ){
-                //   return [...prevDevices, device];
-                // }
+                if( device.name == null ){
+                  // console.log("Device has no name, skipping: ", device.id, device.rssi);
+                  return [...prevDevices];
+                }
 
-                // return [...prevDevices];
-
+                // Add the new device to the list
                 return [...prevDevices, device];
 
               }
+              
               //console.log("Device already exists in the list:", device.id, device.rssi);
               // Optionally, you can update the RSSI value if needed
               const updatedDevices = prevDevices.map((d) => {
@@ -258,6 +278,8 @@ export default function HomeScreen() {
                 }
                 return d;
               });
+
+
               return updatedDevices;
               //return prevDevices;
             });
@@ -281,40 +303,42 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
+    <ThemedView style={styles.container}>
+		<SafeAreaView style={{ flex: 1, 
+		padding: 10, 
+		//backgroundColor: 'rgba(250,100,250,0.0)' 
+		}} edges={['top', 'bottom']}>
+		
+
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Battery Monitor</ThemedText>
         <HelloWave />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Select Device</ThemedText>
 
+      <ThemedText type="subtitle">Select Device</ThemedText>
 
-        {
-          ble_devices.length > 0 ? (
-            ble_devices.map((device) => (
-              device.name ? (
-                <SelectableDevice key={device.id} device={device} onSelect={btDeviceSelected} />
-              ) : null
-            ))
-          ) : (
-            <ThemedText>No BlueTooth devices found.</ThemedText>
-          )
-        }
+      <ThemedText>{ble_scanning ? 'Scanning...' : 'Not Scanning'}</ThemedText>
 
-        <ThemedText>{ble_scanning ? 'Scanning...' : 'Not Scanning'}</ThemedText>
+      <View style={{ paddingBottom: 10, flex:1, backgroundColor: 'rgba(202, 130, 130, 0)' }}>
+        <FlatList
+							onRefresh={refreshBLEList}
+							refreshing={ble_refreshing}
+							data={ble_devices}
+							// keyExtractor={(item, index) => item.key}
+							renderItem={({ item }) => (
+                <View>
+                {/* <ThemedText>{item.name} {item.id}</ThemedText> */}
+                <SelectableDevice key={item.id} device={item} onSelect={btDeviceSelected} />
+                <Text></Text>
+                </View>
+							)}
+						/>
 
-      </ThemedView>
+        </View>
+        
 
-
-    </ParallaxScrollView>
+    </SafeAreaView>
+    </ThemedView>
   );
 }
 
@@ -324,6 +348,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+
+  container: {
+		flex: 1,
+	  },
+	
   stepContainer: {
     gap: 8,
     marginBottom: 8,

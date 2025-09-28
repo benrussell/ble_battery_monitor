@@ -44,9 +44,9 @@ function LastUpdateLabel() {
 
 	return (
 		<ThemedText style={{ marginVertical: 8 }}>
-			Last Update: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : 'N/A'}
+			{/* Last: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : 'N/A'} */}
 			{' '}
-			(Delta Time: {lastUpdate ? `${Math.floor((Date.now() - lastUpdate) / 1000)}s` : 'N/A'})
+			(Last: {lastUpdate ? `${Math.floor((Date.now() - lastUpdate) / 1000)}s` : 'N/A'})
 		</ThemedText>
 	);
 }
